@@ -1,18 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using Amazon;
+using UnityEngine.SceneManagement;
+
 
 public class CanvasControl : MonoBehaviour {
     public Canvas myCanvas;
-
+    
     public RectTransform imageTopLeft;
     public RectTransform imageTopRight;
     public RectTransform imageBottomLeft;
     public RectTransform imageBottomRight;
     public RectTransform imageLogo;
 
-	// Use this for initialization
-	void Start () {
+    //public SQSMessageListener msgListener;
+
+    private string IdentityPoolId = "us-east-1:05c9e46e-8369-46b4-b0fc-359c3186dab0";
+    private string QueueName = "colorexpert";
+    private string queueUrl = "https://sqs.us-east-1.amazonaws.com/209409240985/colorexpert" + "/?Action=SetQueueAttributes&Attribute.Name=ReceiveMessageWaitTimeSeconds&Attribute.Value=20";
+
+    // Use this for initialization
+    void Start () {
         myCanvas = this.GetComponent<Canvas>();
         Transform transformObj = this.imageTopLeft.transform;
         if (null == transformObj)
@@ -24,6 +33,9 @@ public class CanvasControl : MonoBehaviour {
         this.imageBottomRight.transform.Translate(new Vector3(500, -250, 0));
         this.imageTopLeft.transform.Translate(new Vector3(-500, 250, 0));
         this.imageTopRight.transform.Translate(new Vector3(500, 250, 0));
+
+        //this.msgListener = new SQSMessageListener(IdentityPoolId, QueueName, queueUrl);
+        //UnityInitializer.AttachToGameObject(this.gameObject);
 
         Debug.Log("The transformation is there");
     }
@@ -81,7 +93,18 @@ public class CanvasControl : MonoBehaviour {
 
         if (0 == updateImageCount )
         {
-            
+            Debug.Log("Finishing moving panels, and start messaging");
+            this.LoadModel("temple");
         }
+    }
+
+    private void LoadModel(string modelName)
+    {
+        Debug.Log("@Come to load scene " + modelName);
+        //var ourObj = Resources.Load(modelName);
+        //ourObj = Resources.Load("fence");
+        //var initiated = Object.Instantiate(ourObj);
+        SceneManager.LoadScene(modelName.ToLower(), LoadSceneMode.Additive);
+        Debug.Log("@After loading the " + modelName);
     }
 }
