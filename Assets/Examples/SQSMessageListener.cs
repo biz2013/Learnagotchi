@@ -16,6 +16,7 @@ public class SQSMessageListener
     private string IdentityPoolId;
     private string queueName;
     private string queueUrl;
+    private ActionInputCallback callback;
 
     public string CognitoIdentityRegion = RegionEndpoint.USEast1.SystemName;
 
@@ -58,11 +59,13 @@ public class SQSMessageListener
         }
     }
 
-    public SQSMessageListener(string id, string queueName, string sqsUrl)
+    internal SQSMessageListener(string id, string queueName, string sqsUrl, ActionInputCallback callbackObj)
     {
         this.IdentityPoolId = id;
         this.queueName = queueName;
         this.queueUrl = sqsUrl;
+        this.callback = callbackObj;
+
     }
 
     internal IEnumerator RepeatRetrieveMessage(float waitTime)
@@ -80,15 +83,9 @@ public class SQSMessageListener
                         //Read the message
                         var messages = result.Response.Messages;
                         messages.ForEach(m => {
-                            Debug.Log(@"Message Id  = " + m.MessageId);
-                            Debug.Log(@"Mesage = " + m.Body);
-
-                            string[] parts = m.Body.Split(new char[] { ' ' });
-                            string modelName = parts[parts.Length - 1];
-                            //this.LoadModel(modelName);
-
-                            //Process the message
-                            //[do your thing here]
+                            Debug.Log(@"New Message Id  = " + m.MessageId);
+                            Debug.Log(@"New Mesage = " + m.Body);
+                            this.callback.TakeAction(m.Body);
 
                             //Delete the message
                             var delRequest = new Amazon.SQS.Model.DeleteMessageRequest

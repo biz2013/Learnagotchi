@@ -2,6 +2,3 @@ sceneSetups:
 - path: Assets/Scenes/welcomepage.unity
   isLoaded: 1
   isActive: 1
-- path: Assets/Scenes/temple.unity
-  isLoaded: 1
-  isActive: 0

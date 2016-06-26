@@ -5,7 +5,7 @@ using Amazon;
 using UnityEngine.SceneManagement;
 
 
-public class CanvasControl : MonoBehaviour {
+public class CanvasControl : MonoBehaviour, ActionInputCallback {
     public Canvas myCanvas;
     
     public RectTransform imageTopLeft;
@@ -35,7 +35,7 @@ public class CanvasControl : MonoBehaviour {
         this.imageTopLeft.transform.Translate(new Vector3(-500, 250, 0));
         this.imageTopRight.transform.Translate(new Vector3(500, 250, 0));
 
-        this.msgListener = new SQSMessageListener(IdentityPoolId, QueueName, queueUrl);
+        this.msgListener = new SQSMessageListener(IdentityPoolId, QueueName, queueUrl, this);
         UnityInitializer.AttachToGameObject(this.gameObject);
 
         Debug.Log("The transformation is there");
@@ -96,7 +96,6 @@ public class CanvasControl : MonoBehaviour {
         {
             Debug.Log("Finishing moving panels, and start messaging");
             StartCoroutine(this.msgListener.RepeatRetrieveMessage(0.1F));
-            this.LoadModel("temple");
             this.panelReady = true;
         }
     }
@@ -109,5 +108,12 @@ public class CanvasControl : MonoBehaviour {
         //var initiated = Object.Instantiate(ourObj);
         SceneManager.LoadScene(modelName.ToLower(), LoadSceneMode.Additive);
         Debug.Log("@After loading the " + modelName);
+    }
+
+    public void TakeAction(string action)
+    {
+        string[] parts = action.Split(new char[] { ' ' });
+        string modelName = parts[parts.Length - 1];
+        this.LoadModel(modelName);
     }
 }
