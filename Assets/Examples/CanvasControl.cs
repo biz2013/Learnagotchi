@@ -14,8 +14,9 @@ public class CanvasControl : MonoBehaviour {
     public RectTransform imageBottomRight;
     public RectTransform imageLogo;
 
-    //public SQSMessageListener msgListener;
+    public SQSMessageListener msgListener;
 
+    private bool panelReady = false;
     private string IdentityPoolId = "us-east-1:05c9e46e-8369-46b4-b0fc-359c3186dab0";
     private string QueueName = "colorexpert";
     private string queueUrl = "https://sqs.us-east-1.amazonaws.com/209409240985/colorexpert" + "/?Action=SetQueueAttributes&Attribute.Name=ReceiveMessageWaitTimeSeconds&Attribute.Value=20";
@@ -34,8 +35,8 @@ public class CanvasControl : MonoBehaviour {
         this.imageTopLeft.transform.Translate(new Vector3(-500, 250, 0));
         this.imageTopRight.transform.Translate(new Vector3(500, 250, 0));
 
-        //this.msgListener = new SQSMessageListener(IdentityPoolId, QueueName, queueUrl);
-        //UnityInitializer.AttachToGameObject(this.gameObject);
+        this.msgListener = new SQSMessageListener(IdentityPoolId, QueueName, queueUrl);
+        UnityInitializer.AttachToGameObject(this.gameObject);
 
         Debug.Log("The transformation is there");
     }
@@ -91,10 +92,12 @@ public class CanvasControl : MonoBehaviour {
             this.imageTopRight.transform.Translate(new Vector3(0, -5, 0));
         }
 
-        if (0 == updateImageCount )
+        if (0 == updateImageCount && !this.panelReady)
         {
             Debug.Log("Finishing moving panels, and start messaging");
+            StartCoroutine(this.msgListener.RepeatRetrieveMessage(0.1F));
             this.LoadModel("temple");
+            this.panelReady = true;
         }
     }
 
